@@ -1,0 +1,167 @@
+{
+  "mappings": [
+    {
+      "id": "write-with-duplicate-ignore",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].tuple_key.user",
+            "equalTo": "user:bob"
+          },
+          {
+            "matchesJsonPath": "$.transaction_options.on_duplicate",
+            "equalTo": "ignore"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "status": "ignored"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "write-with-duplicate-fail",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.transaction_options.on_duplicate",
+            "equalTo": "fail"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "duplicate tuple found"
+        }
+      }
+    },
+    {
+      "id": "write-with-missing-ignore",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.transaction_options.on_missing",
+            "equalTo": "ignore"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deletes": [
+            {
+              "tuple_key": {
+                "user": "user:carol",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "status": "ignored"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "write-with-missing-fail",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.transaction_options.on_missing",
+            "equalTo": "fail"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "tuple not found for deletion"
+        }
+      }
+    },
+    {
+      "id": "write-large-batch",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[999]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [],
+          "deletes": []
+        },
+        "fixedDelayMilliseconds": 5000
+      }
+    },
+    {
+      "id": "write-authorization-model-validation",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].tuple_key.relation",
+            "equalTo": "invalid_rel"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "relation not found in authorization model"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "mappings": [
+    {
+      "id": "auth-error-invalid-token",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Authorization": {
+            "equalTo": "Bearer invalid_token"
+          }
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "unauthenticated",
+          "message": "Invalid authentication credentials"
+        }
+      }
+    },
+    {
+      "id": "auth-error-expired-token",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Authorization": {
+            "equalTo": "Bearer expired_token"
+          },
+          "X-Test-Scenario": {
+            "equalTo": "expired_token"
+          }
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "unauthenticated",
+          "message": "token expired"
+        }
+      }
+    },
+    {
+      "id": "authz-error-insufficient-permissions",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Authorization": {
+            "equalTo": "Bearer limited_token"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "permission_denied",
+          "message": "Insufficient permissions for this operation"
+        }
+      }
+    },
+    {
+      "id": "validation-error-missing-user",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key[?(!@.user || @.user == '')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "invalid_argument",
+          "message": "user is required"
+        }
+      }
+    },
+    {
+      "id": "not-found-invalid-store",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/invalid_store_id/check"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "not_found",
+          "message": "store not found"
+        }
+      }
+    },
+    {
+      "id": "rate-limit-error",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "rate_limit"
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "60"
+        },
+        "jsonBody": {
+          "code": "resource_exhausted",
+          "message": "rate limit exceeded"
+        }
+      }
+    },
+    {
+      "id": "server-error",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "server_error"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "internal",
+          "message": "internal server error"
+        }
+      }
+    },
+    {
+      "id": "token-refresh-success",
+      "request": {
+        "method": "POST",
+        "urlPath": "/oauth/token",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "grant_type": "client_credentials",
+              "client_id": "test_client_id",
+              "client_secret": "test_client_secret",
+              "audience": "https://api.fga.example"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store",
+          "X-Token-Issued-At": "{{now format='yyyy-MM-dd HH:mm:ss'}}",
+          "X-Token-Expires-At": "{{now offset='+3600 seconds' format='yyyy-MM-dd HH:mm:ss'}}"
+        },
+        "jsonBody": {
+          "access_token": "new_access_token_{{randomValue length=16 type='ALPHANUMERIC'}}",
+          "token_type": "Bearer",
+          "expires_in": 3600,
+          "scope": "read:tuples write:tuples",
+          "refresh_token": "refresh_{{randomValue length=32 type='ALPHANUMERIC'}}",
+          "issued_at": "{{now}}",
+          "expires_at": "{{now offset='+3600 seconds'}}"
+        }
+      }
+    },
+    {
+      "id": "token-refresh-failure",
+      "request": {
+        "method": "POST",
+        "urlPath": "/oauth/token",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.client_id[?(@ == 'invalid_client')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "invalid_client",
+          "error_description": "token refresh failed"
+        }
+      }
+    }
+  ]
+}

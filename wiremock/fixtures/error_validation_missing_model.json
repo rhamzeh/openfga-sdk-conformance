@@ -1,0 +1,4 @@
+{
+  "code": "validation_error",
+  "message": "authorization model ID is required for this operation"
+}

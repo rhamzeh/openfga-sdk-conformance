@@ -1,0 +1,509 @@
+[
+  {
+    "id": "list-relations-check-viewer",
+    "name": "ListRelations - Check for viewer relation",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"viewer\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "list-relations-check-editor",
+    "name": "ListRelations - Check for editor relation",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"editor\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "list-relations-check-admin",
+    "name": "ListRelations - Check for admin relation (denied)",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"admin\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": false,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "write-parallel-request-1",
+    "name": "Write - Parallel Request 1 (Non-transactional)",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].relation",
+          "equalToJson": "\"viewer\""
+        },
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].object",
+          "equalToJson": "\"document:readme\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {}
+    }
+  },
+  {
+    "id": "write-parallel-request-2",
+    "name": "Write - Parallel Request 2 (Non-transactional)",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].user",
+          "equalToJson": "\"user:bob\""
+        },
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].relation",
+          "equalToJson": "\"editor\""
+        },
+        {
+          "matchesJsonPath": "$.writes.tuple_keys[0].object",
+          "equalToJson": "\"document:readme\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {}
+    }
+  },
+  {
+    "id": "write-onduplicate-ignore",
+    "name": "Write - onDuplicate IGNORE",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.writes.on_duplicate",
+          "equalToJson": "\"IGNORE\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "writes": [
+          {
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "viewer",
+              "object": "document:readme"
+            },
+            "status": "SUCCESS"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "write-onduplicate-error",
+    "name": "Write - onDuplicate RETURN_ERROR",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.writes.on_duplicate",
+          "equalToJson": "\"RETURN_ERROR\""
+        }
+      ]
+    },
+    "response": {
+      "status": 409,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "code": "write_failed_due_to_invalid_input",
+        "message": "Duplicate tuple found"
+      }
+    }
+  },
+  {
+    "id": "read-latest-authorization-model",
+    "name": "ReadLatestAuthorizationModel",
+    "request": {
+      "method": "GET",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/authorization-models?page_size=1"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "authorization_model": {
+          "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "schema_version": "1.1",
+          "type_definitions": [
+            {
+              "type": "user"
+            },
+            {
+              "type": "document",
+              "relations": {
+                "viewer": {
+                  "this": {}
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "batch-check-multiple",
+    "name": "BatchCheck - Multiple Checks",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "results": [
+          {
+            "allowed": true,
+            "request": {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              }
+            }
+          },
+          {
+            "allowed": true,
+            "request": {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor", 
+                "object": "document:readme"
+              }
+            }
+          },
+          {
+            "allowed": false,
+            "request": {
+              "tuple_key": {
+                "user": "user:carol",
+                "relation": "admin",
+                "object": "document:readme"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-alice-viewer",
+    "name": "ClientBatchCheck - Alice viewer check",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"viewer\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-bob-editor",
+    "name": "ClientBatchCheck - Bob editor check",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:bob\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"editor\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-carol-admin",
+    "name": "ClientBatchCheck - Carol admin check (denied)",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:carol\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"admin\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"document:readme\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": false,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-with-headers",
+    "name": "ClientBatchCheck - Check with custom headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Client-Batch-ID": {
+          "equalTo": "client-batch-001"
+        },
+        "Authorization": {
+          "contains": "Bearer client-batch-token-123"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-contextual",
+    "name": "ClientBatchCheck - Check with contextual tuples",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.contextual_tuples"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "client-batch-check-context-object",
+    "name": "ClientBatchCheck - Check with context object",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.context"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  }
+]

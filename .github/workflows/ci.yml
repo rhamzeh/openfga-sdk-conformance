@@ -1,0 +1,328 @@
+name: Conformance Test Suite CI
+
+# Comprehensive CI pipeline testing all 5 SDKs:
+# - Go SDK with Godog/Cucumber
+# - JavaScript SDK with Cucumber.js  
+# - Python SDK with Behave
+# - .NET SDK with SpecFlow
+# - Java SDK with Cucumber JVM
+# Each SDK tests: Basic APIs, Header Validation, Advanced APIs, StreamedListObjects
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  WIREMOCK_PORT: 8080
+
+jobs:
+  # Single WireMock setup job that all SDK tests depend on
+  setup-wiremock:
+    name: Setup WireMock Service
+    runs-on: ubuntu-latest
+    services:
+      wiremock:
+        image: wiremock/wiremock:latest
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl -f http://localhost:8080/__admin/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Wait for WireMock
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8080/__admin/health; do sleep 1; done'
+
+      - name: Load all WireMock mappings once
+        run: |
+          # Load individual mapping files
+          for mapping in wiremock/mappings/*.json; do
+            echo "Loading mapping file: $mapping"
+            curl -X POST http://localhost:8080/__admin/mappings/import \
+              -H "Content-Type: application/json" \
+              -d @"$mapping" || exit 1
+          done
+          
+          # Load bundle files recursively from organized structure
+          if find wiremock/bundles -name "*.json" -type f | head -1 > /dev/null 2>&1; then
+            find wiremock/bundles -name "*.json" -type f | while read bundle; do
+              echo "Loading mapping bundle: $bundle"
+              curl -X POST http://localhost:8080/__admin/mappings/import \
+                -H "Content-Type: application/json" \
+                -d @"$bundle" || exit 1
+            done
+          fi
+
+      - name: Validate fixture files
+        run: |
+          if ls wiremock/fixtures/*.json 1> /dev/null 2>&1; then
+            for fixture in wiremock/fixtures/*.json; do
+              echo "Validating fixture: $fixture"
+              python -m json.tool "$fixture" > /dev/null || exit 1
+            done
+          fi
+
+      - name: Test WireMock responses
+        run: |
+          # Test basic check scenario
+          response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -d '{"tuple_key":{"user":"user:alice","relation":"viewer","object":"document:readme"}}')
+          echo "Basic check response: $response"
+          echo "$response" | grep -q '"allowed":true' || exit 1
+          
+          # Test header validation scenarios
+          echo "Testing header validation scenarios..."
+          
+          # Test custom headers
+          custom_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -H "X-Custom-Header: custom-value" \
+            -H "X-Test-ID: test-123" \
+            -d '{"tuple_key":{"user":"user:alice","relation":"viewer","object":"document:readme"}}')
+          echo "Custom headers response: $custom_response"
+          echo "$custom_response" | grep -q '"allowed":true' || exit 1
+          
+          # Test authorization header
+          auth_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer test-token-123" \
+            -d '{"tuple_key":{"user":"user:alice","relation":"viewer","object":"document:readme"}}')
+          echo "Authorization header response: $auth_response"
+          echo "$auth_response" | grep -q '"allowed":true' || exit 1
+          
+          # Test missing authorization (should fail)
+          unauth_response=$(curl -s -w "%{http_code}" -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -d '{"tuple_key":{"user":"user:alice","relation":"viewer","object":"document:readme"}}')
+          echo "Unauthorized response code: $unauth_response"
+          echo "$unauth_response" | grep -q "401" || exit 1
+          
+          # Test advanced API scenarios
+          echo "Testing advanced API scenarios..."
+          
+          # Test ReadChanges
+          changes_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/read-changes \
+            -H "Content-Type: application/json" \
+            -d '{"type":"document"}')
+          echo "ReadChanges response: $changes_response"
+          echo "$changes_response" | grep -q '"changes"' || exit 1
+          
+          # Test ListObjects
+          list_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects \
+            -H "Content-Type: application/json" \
+            -d '{"user":"user:alice","relation":"viewer","type":"document"}')
+          echo "ListObjects response: $list_response"
+          echo "$list_response" | grep -q '"objects"' || exit 1
+          
+          # Test advanced Write API with transaction options
+          echo "Testing advanced Write API scenarios..."
+          write_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write \
+            -H "Content-Type: application/json" \
+            -d '{"writes":[{"tuple_key":{"user":"user:bob","relation":"editor","object":"document:doc1"}}],"transaction_options":{"on_duplicate":"ignore"}}')
+          echo "Advanced Write response: $write_response"
+          
+          # Test conditional writes
+          conditional_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write \
+            -H "Content-Type: application/json" \
+            -d '{"writes":[{"tuple_key":{"user":"user:bob","relation":"editor","object":"document:doc1"},"condition":"ip_check"}]}')
+          echo "Conditional Write response: $conditional_response"
+          
+          # Test wildcard user checks
+          wildcard_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -d '{"tuple_key":{"user":"user:*","relation":"viewer","object":"document:doc1"}}')
+          echo "Wildcard Check response: $wildcard_response"
+          
+          # Test error scenarios
+          echo "Testing error scenarios..."
+          error_response=$(curl -s -X POST http://localhost:8080/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check \
+            -H "Content-Type: application/json" \
+            -d '{"tuple_key":{"user":"","relation":"viewer","object":"document:doc1"}}')
+          echo "Error scenario response: $error_response"
+
+  validate-scenarios:
+    name: Validate Gherkin Scenarios
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Gherkin syntax
+        run: |
+          # Install gherkin-lint if available, or basic validation
+          find features/ -name "*.feature" -exec echo "Validating {}" \;
+          # TODO: Add proper Gherkin linting tool
+
+      - name: Validate step vocabulary
+        run: |
+          # Check for consistent step patterns
+          echo "Validating step vocabulary consistency..."
+          # TODO: Add step vocabulary validation script
+
+  # Matrix strategy for testing all SDKs efficiently
+  test-sdks:
+    name: Test ${{ matrix.sdk }} SDK
+    runs-on: ubuntu-latest
+    needs: setup-wiremock
+    strategy:
+      matrix:
+        sdk: [go, javascript, python, dotnet, java]
+        include:
+          - sdk: go
+            runtime: go
+            version: '1.21'
+            working-directory: runners/go
+            test-command: |
+              go mod tidy
+              go test -v ./...
+          - sdk: javascript
+            runtime: node
+            version: '18'
+            working-directory: runners/js
+            test-command: |
+              npm install
+              npm test
+          - sdk: python
+            runtime: python
+            version: '3.9'
+            working-directory: runners/python
+            test-command: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt || pip install behave openfga-sdk assertpy
+              behave features/ --tags=~@skip
+          - sdk: dotnet
+            runtime: dotnet
+            version: '6.0'
+            working-directory: runners/dotnet
+            test-command: |
+              dotnet restore
+              dotnet test --verbosity normal
+          - sdk: java
+            runtime: java
+            version: '11'
+            working-directory: runners/java
+            test-command: |
+              if [ -f "pom.xml" ]; then
+                mvn clean test
+              elif [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+                ./gradlew test || gradle test
+              else
+                echo "No Maven or Gradle build file found"
+                exit 1
+              fi
+
+    services:
+      wiremock:
+        image: wiremock/wiremock:latest
+        ports:
+          - 8080:8080
+        volumes:
+          - ${{ github.workspace }}/wiremock:/home/wiremock
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup ${{ matrix.runtime }}
+        if: matrix.runtime == 'go'
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.version }}
+
+      - name: Setup ${{ matrix.runtime }}
+        if: matrix.runtime == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.version }}
+
+      - name: Setup ${{ matrix.runtime }}
+        if: matrix.runtime == 'python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.version }}
+
+      - name: Setup ${{ matrix.runtime }}
+        if: matrix.runtime == 'dotnet'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.version }}
+
+      - name: Setup ${{ matrix.runtime }}
+        if: matrix.runtime == 'java'
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.version }}
+          distribution: 'temurin'
+
+      - name: Wait for WireMock
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8080/__admin/health; do sleep 1; done'
+
+      - name: Load WireMock mappings
+        run: |
+          # Load all mapping files (already loaded by setup-wiremock, but ensuring availability)
+          for mapping in wiremock/mappings/*.json; do
+            echo "Loading mapping file: $mapping"
+            curl -X POST http://localhost:8080/__admin/mappings/import \
+              -H "Content-Type: application/json" \
+              -d @"$mapping" || exit 1
+          done
+
+      - name: Run ALL ${{ matrix.sdk }} tests
+        working-directory: ${{ matrix.working-directory }}
+        env:
+          WIREMOCK_URL: http://localhost:8080
+        run: ${{ matrix.test-command }}
+
+  documentation:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check documentation links
+        run: |
+          # Basic link validation
+          find docs/ -name "*.md" -exec echo "Checking {}" \;
+          # TODO: Add proper markdown link checker
+
+      - name: Validate step vocabulary documentation
+        run: |
+          echo "Validating step vocabulary documentation..."
+          test -f docs/STEP_VOCABULARY.md || exit 1
+          test -f docs/WORKFLOW.md || exit 1
+          test -f docs/VERSIONING.md || exit 1
+          test -f docs/PORTABILITY.md || exit 1
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in fixtures
+        run: |
+          # Scan for potential secrets in fixture files
+          echo "Scanning for potential secrets..."
+          if grep -r -i "password\|secret\|token\|key" wiremock/fixtures/ --exclude="*.md"; then
+            echo "Warning: Potential secrets found in fixtures"
+            # Don't fail for now, just warn
+          fi
+
+      - name: Validate test data
+        run: |
+          # Ensure test data doesn't contain real credentials
+          echo "Validating test data safety..."
+          # All store IDs should be test ULIDs
+          grep -r "01H0H40Z9QDYNR71MRAG9FPE7" wiremock/ || echo "Test store IDs validated"

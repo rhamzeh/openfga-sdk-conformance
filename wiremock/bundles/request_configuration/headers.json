@@ -1,0 +1,130 @@
+{
+  "mappings": [
+    {
+      "id": "check-with-default-headers",
+      "name": "Check request with default headers",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          },
+          "X-Client-ID": {
+            "equalTo": "test-client-123"
+          },
+          "X-Version": {
+            "equalTo": "v1.0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_allowed.json"
+      }
+    },
+    {
+      "id": "read-with-persistent-header",
+      "name": "Read request with persistent header",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          },
+          "X-Persistent-Header": {
+            "equalTo": "should-appear-everywhere"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_all_tuples.json"
+      }
+    },
+    {
+      "id": "write-with-client-id",
+      "name": "Write request with client ID header",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          },
+          "X-Client-ID": {
+            "equalTo": "test-client-123"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "check-with-override-header",
+      "name": "Check request with overridden header",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          },
+          "X-Client-ID": {
+            "equalTo": "override-client"
+          },
+          "X-Version": {
+            "equalTo": "v1.0"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_allowed.json"
+      }
+    },
+    {
+      "id": "check-with-valid-header-only",
+      "name": "Check request with only valid header (empty header excluded)",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          },
+          "X-Valid-Header": {
+            "equalTo": "valid-value"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_allowed.json"
+      }
+    }
+  ]
+}

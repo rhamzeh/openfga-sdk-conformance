@@ -1,0 +1,50 @@
+{
+  "mappings": [
+    {
+      "id": "streamed-list-objects-success",
+      "name": "StreamedListObjects - successful streaming response",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/streamed-list-objects",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.type",
+            "equalToJson": "\"document\""
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson"
+        },
+        "body": "{\"object\":\"document:doc1\"}\n{\"object\":\"document:doc2\"}\n{\"object\":\"document:doc3\"}\n"
+      }
+    },
+    {
+      "id": "streamed-list-objects-empty",
+      "name": "StreamedListObjects - empty result set",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/streamed-list-objects",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "empty_result"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson"
+        },
+        "body": ""
+      }
+    }
+  ]
+}

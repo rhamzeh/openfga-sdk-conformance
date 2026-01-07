@@ -1,0 +1,200 @@
+{
+  "mappings": [
+    {
+      "id": "read-all-tuples",
+      "name": "Read all tuples with no filter",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "equalToJson": {}
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_all_tuples.json"
+      }
+    },
+    {
+      "id": "read-user-filter",
+      "name": "Read tuples with user filter",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "user": "user:alice"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_user_alice.json"
+      }
+    },
+    {
+      "id": "read-relation-filter",
+      "name": "Read tuples with relation filter",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "relation": "viewer"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_relation_viewer.json"
+      }
+    },
+    {
+      "id": "read-object-filter",
+      "name": "Read tuples with object filter",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "object": "document:readme"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_object_readme.json"
+      }
+    },
+    {
+      "id": "read-complete-tuple",
+      "name": "Read tuples with complete tuple filter",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_complete_tuple.json"
+      }
+    },
+    {
+      "id": "read-with-pagination",
+      "name": "Read with pagination",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.page_size",
+            "equalToJson": {
+              "page_size": 10
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_paginated.json"
+      }
+    },
+    {
+      "id": "read-first-page",
+      "name": "Read first page for continuation token test",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "page_size": 1
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_first_page.json"
+      }
+    },
+    {
+      "id": "read-with-continuation",
+      "name": "Read with continuation token",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/read",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.continuation_token"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "read_second_page.json"
+      }
+    }
+  ]
+}

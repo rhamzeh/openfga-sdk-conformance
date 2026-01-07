@@ -1,0 +1,327 @@
+{
+  "mappings": [
+    {
+      "id": "read-changes-basic",
+      "name": "ReadChanges - basic request with no parameters",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor", 
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T16:15:30.987654321Z"
+            }
+          ],
+          "continuation_token": "eyJwayI6IkxBVEVTVF9OU0NPTkZJR19hdXRoMHN0b3JlIiwic2siOiIxem1qbXF3MWZLZExTcUoyN01MdTdqTjh0cWgifQ=="
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-type-filter",
+      "name": "ReadChanges - with type filter",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "type": {
+            "equalTo": "tuple"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-from-timestamp",
+      "name": "ReadChanges - with from timestamp filtering",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "from": {
+            "equalTo": "2024-01-15T14:30:25Z"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T16:15:30.987654321Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-to-timestamp",
+      "name": "ReadChanges - with to timestamp filtering",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "to": {
+            "equalTo": "2024-01-15T16:30:25Z"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-time-range",
+      "name": "ReadChanges - with time range filtering",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "from": {
+            "equalTo": "2024-01-15T14:30:25Z"
+          },
+          "to": {
+            "equalTo": "2024-01-15T16:30:25Z"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T16:15:30.987654321Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-time-and-type-filter",
+      "name": "ReadChanges - with time filtering and type filter",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "type": {
+            "equalTo": "tuple"
+          },
+          "from": {
+            "equalTo": "2024-01-15T14:30:25Z"
+          },
+          "to": {
+            "equalTo": "2024-01-15T16:30:25Z"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-invalid-timestamp",
+      "name": "ReadChanges - invalid timestamp format",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "from": {
+            "equalTo": "invalid-timestamp"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid timestamp format"
+        }
+      }
+    },
+    {
+      "id": "read-changes-future-timestamp",
+      "name": "ReadChanges - future timestamp returns empty",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "from": {
+            "equalTo": "2030-01-01T00:00:00Z"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": []
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-time-and-pagination",
+      "name": "ReadChanges - with time filtering and pagination",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+        "queryParameters": {
+          "from": {
+            "equalTo": "2024-01-15T14:30:25Z"
+          },
+          "page_size": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T15:30:25.123456789Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T16:15:30.987654321Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:carol",
+                "relation": "admin",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T17:00:15.456789123Z"
+            }
+          ],
+          "continuation_token": "eyJwayI6IkxBVEVTVF9OU0NPTkZJR19hdXRoMHN0b3JlIiwic2siOiIxem1qbXF3MWZLZExTcUoyN01MdTdqTjh0cWgifQ=="
+        }
+      }
+    }
+  ]
+}

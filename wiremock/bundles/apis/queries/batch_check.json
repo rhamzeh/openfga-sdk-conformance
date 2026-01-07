@@ -1,0 +1,272 @@
+{
+  "mappings": [
+    {
+      "id": "batch-check-success",
+      "name": "BatchCheck - successful multiple checks",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[*].tuple_key"
+          },
+          {
+            "matchesJsonPath": "$.checks[*].correlation_id"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "allowed": true,
+              "correlation_id": "check-alice-viewer",
+              "request": {
+                "tuple_key": {
+                  "user": "user:alice",
+                  "relation": "viewer",
+                  "object": "document:doc1"
+                }
+              }
+            },
+            {
+              "allowed": false,
+              "correlation_id": "check-bob-admin",
+              "request": {
+                "tuple_key": {
+                  "user": "user:bob",
+                  "relation": "admin",
+                  "object": "document:doc1"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-with-auth-model",
+      "name": "BatchCheck - with authorization model ID",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.authorization_model_id",
+            "equalToJson": "\"01G50QVV17PECNVAHX1GG4Y5NC\""
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "allowed": true,
+              "request": {
+                "tuple_key": {
+                  "user": "user:alice",
+                  "relation": "viewer",
+                  "object": "document:doc1"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-with-correlation-ids",
+      "name": "BatchCheck - with explicit correlation IDs",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[?(@.correlation_id == 'check-alice-viewer')]"
+          },
+          {
+            "matchesJsonPath": "$.checks[?(@.correlation_id == 'check-bob-editor')]"
+          },
+          {
+            "matchesJsonPath": "$.checks[?(@.correlation_id == 'check-carol-admin')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "allowed": true,
+              "correlation_id": "check-alice-viewer"
+            },
+            {
+              "allowed": true,
+              "correlation_id": "check-bob-editor"
+            },
+            {
+              "allowed": false,
+              "correlation_id": "check-carol-admin"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-deduplication",
+      "name": "BatchCheck - with duplicate requests for deduplication testing",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[?(@.tuple_key.user == 'user:alice' && @.tuple_key.relation == 'viewer' && @.tuple_key.object == 'document:readme')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "allowed": true,
+              "correlation_id": "dedup-alice-viewer-1"
+            },
+            {
+              "allowed": true,
+              "correlation_id": "dedup-bob-editor-1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-large-batch",
+      "name": "BatchCheck - large batch (50+ items)",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[50]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": "{{jsonPath request.body '$.checks[*]' | map(index, item) | map({'allowed': (index % 3 != 2), 'correlation_id': item.correlation_id}) }}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "batch-check-invalid-correlation-id",
+      "name": "BatchCheck - invalid correlation ID format",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[?(@.correlation_id && @.correlation_id.length() > 36)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "correlation_id must be between 1-36 characters and contain only alphanumeric characters or dashes"
+        }
+      }
+    },
+    {
+      "id": "batch-check-duplicate-correlation-ids",
+      "name": "BatchCheck - duplicate correlation IDs",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[0].correlation_id"
+          },
+          {
+            "matchesJsonPath": "$.checks[1].correlation_id"
+          },
+          {
+            "equalToJson": "{\"checks\": [{\"tuple_key\": {\"user\": \"user:alice\", \"relation\": \"viewer\", \"object\": \"document:readme\"}, \"correlation_id\": \"duplicate-id\"}, {\"tuple_key\": {\"user\": \"user:bob\", \"relation\": \"editor\", \"object\": \"document:readme\"}, \"correlation_id\": \"duplicate-id\"}]}"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "correlation_id must be unique within the request"
+        }
+      }
+    },
+    {
+      "id": "batch-check-with-contextual-tuples-enhanced",
+      "name": "BatchCheck - with contextual tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.contextual_tuples"
+          },
+          {
+            "matchesJsonPath": "$.checks[*].tuple_key"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {
+              "allowed": true,
+              "correlation_id": "contextual-check-1"
+            },
+            {
+              "allowed": true,
+              "correlation_id": "contextual-check-2"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

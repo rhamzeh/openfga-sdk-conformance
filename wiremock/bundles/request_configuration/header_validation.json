@@ -1,0 +1,632 @@
+[
+  {
+    "id": "header-validation-check-with-custom-headers",
+    "name": "Check API with custom request headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Custom-Header": {
+          "equalTo": "custom-value"
+        },
+        "X-Test-ID": {
+          "equalTo": "test-123"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-ID": "resp-456",
+        "X-Processing-Time": "25ms",
+        "Cache-Control": "no-cache"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-check-authorization",
+    "name": "Check API with authorization header validation",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "matches": "Bearer .*"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Auth-Validated": "true",
+        "X-Token-Type": "Bearer"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-check-missing-auth",
+    "name": "Check API without required authorization header",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "absent": true
+        }
+      }
+    },
+    "response": {
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json",
+        "WWW-Authenticate": "Bearer"
+      },
+      "jsonBody": {
+        "code": "unauthenticated",
+        "message": "Authorization header is required"
+      }
+    }
+  },
+  {
+    "id": "header-validation-write-with-content-length",
+    "name": "Write API with content-length validation",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Content-Length": {
+          "matches": "[1-9][0-9]*"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.writes"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Content-Length": "45",
+        "X-Request-Size": "validated"
+      },
+      "jsonBody": {
+        "authorization_model_id": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+      }
+    }
+  },
+  {
+    "id": "header-validation-read-changes-pagination",
+    "name": "ReadChanges API with pagination headers",
+    "request": {
+      "method": "GET",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes",
+      "headers": {
+        "Accept": {
+          "equalTo": "application/json"
+        },
+        "X-Page-Size": {
+          "equalTo": "10"
+        }
+      },
+      "queryParameters": {
+        "page_size": {
+          "equalTo": "10"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Total-Count": "25",
+        "X-Page-Size": "10",
+        "X-Has-More": "true",
+        "Link": "</stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes?continuation_token=next123>; rel=\"next\""
+      },
+      "jsonBody": {
+        "changes": [
+          {
+            "type": "tuple_to_userset",
+            "operation": "write",
+            "tuple_key": {
+              "object": "document:1",
+              "relation": "viewer",
+              "user": "user:alice"
+            },
+            "timestamp": "2024-01-01T12:00:00Z"
+          }
+        ],
+        "continuation_token": "next123"
+      }
+    }
+  },
+  {
+    "id": "header-validation-cors-preflight",
+    "name": "CORS preflight request for Check endpoint",
+    "request": {
+      "method": "OPTIONS",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Origin": {
+          "equalTo": "https://example.com"
+        },
+        "Access-Control-Request-Method": {
+          "equalTo": "POST"
+        },
+        "Access-Control-Request-Headers": {
+          "equalTo": "Content-Type,Authorization"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Access-Control-Allow-Origin": "https://example.com",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Custom-Header",
+        "Access-Control-Max-Age": "3600",
+        "Vary": "Origin"
+      }
+    }
+  },
+  {
+    "id": "header-validation-case-insensitive",
+    "name": "Check API with case-insensitive header matching",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "content-type": {
+          "equalToIgnoreCase": "APPLICATION/JSON"
+        },
+        "x-custom-header": {
+          "equalToIgnoreCase": "CUSTOM-VALUE"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Case-Handled": "true"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-special-characters",
+    "name": "Check API with special characters in headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Special-Header": {
+          "equalTo": "value-with-special-chars!@#$%"
+        },
+        "X-Unicode-Header": {
+          "equalTo": "测试-value-🔧"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Special-Response": "handled-special-chars",
+        "X-Unicode-Response": "unicode-支持"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-multiple-requests-same-header",
+    "name": "First request in multi-request scenario",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Request-ID": {
+          "equalTo": "req-001"
+        },
+        "X-Session-ID": {
+          "equalTo": "session-123"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-ID": "resp-001",
+        "X-Session-Validated": "true"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-multiple-requests-different-header",
+    "name": "Second request in multi-request scenario",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Request-ID": {
+          "equalTo": "req-002"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-ID": "resp-002",
+        "X-Session-Validated": "false"
+      },
+      "jsonBody": {
+        "allowed": false,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-rate-limiting",
+    "name": "Check API with rate limiting headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Rate-Limit-Key": {
+          "equalTo": "user:alice"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "1000",
+        "X-RateLimit-Remaining": "999",
+        "X-RateLimit-Reset": "1640995200"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-rate-limit-exceeded",
+    "name": "Check API with rate limit exceeded",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Rate-Limit-Key": {
+          "equalTo": "user:bob"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-RateLimit-Limit": "1000",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "1640995200",
+        "Retry-After": "60"
+      },
+      "jsonBody": {
+        "code": "too_many_requests",
+        "message": "Rate limit exceeded"
+      }
+    }
+  },
+  {
+    "id": "header-validation-user-agent",
+    "name": "Check API with User-Agent validation",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "User-Agent": {
+          "matches": "openfga-sdk/.*"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-SDK-Validated": "true",
+        "X-Client-Type": "official-sdk"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-accept-encoding",
+    "name": "Check API with Accept-Encoding header",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Accept-Encoding": {
+          "contains": "gzip"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+        "Vary": "Accept-Encoding"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "header-validation-invalid-content-type",
+    "name": "Check API with invalid content type",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "text/plain"
+        }
+      }
+    },
+    "response": {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "code": "invalid_request",
+        "message": "Content-Type must be application/json"
+      }
+    }
+  },
+  {
+    "id": "header-validation-missing-content-type",
+    "name": "Check API with missing content type",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "absent": true
+        }
+      }
+    },
+    "response": {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "jsonBody": {
+        "code": "invalid_request",
+        "message": "Content-Type header is required"
+      }
+    }
+  },
+  {
+    "id": "header-validation-custom-error-headers",
+    "name": "Check API with custom error response headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Force-Error": {
+          "equalTo": "true"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key"
+        }
+      ]
+    },
+    "response": {
+      "status": 500,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Error-ID": "err-12345",
+        "X-Error-Source": "header-validation-test",
+        "X-Retry-After": "30"
+      },
+      "jsonBody": {
+        "code": "internal_error",
+        "message": "Forced error for testing"
+      }
+    }
+  },
+  {
+    "id": "header-validation-list-objects-headers",
+    "name": "ListObjects API with custom headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-List-Type": {
+          "equalTo": "objects"
+        },
+        "X-Max-Results": {
+          "equalTo": "50"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.type"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Result-Count": "3",
+        "X-List-Type": "objects",
+        "Cache-Control": "max-age=300"
+      },
+      "jsonBody": {
+        "objects": [
+          "document:1",
+          "document:2", 
+          "document:3"
+        ]
+      }
+    }
+  },
+  {
+    "id": "header-validation-streaming-headers",
+    "name": "StreamedListObjects API with streaming headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/streamed-list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Accept": {
+          "equalTo": "application/x-ndjson"
+        },
+        "X-Stream-Type": {
+          "equalTo": "objects"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.type"
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "Transfer-Encoding": "chunked",
+        "X-Stream-Started": "true",
+        "Cache-Control": "no-cache"
+      },
+      "body": "{\"object\":\"document:1\"}\n{\"object\":\"document:2\"}\n{\"object\":\"document:3\"}\n"
+    }
+  }
+]

@@ -1,0 +1,229 @@
+{
+  "mappings": [
+    {
+      "id": "write-single-tuple",
+      "name": "Write single tuple",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "writes": {
+                "tuple_keys": [
+                  {
+                    "user": "user:alice",
+                    "relation": "viewer",
+                    "object": "document:readme"
+                  }
+                ]
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "write-multiple-tuples",
+      "name": "Write multiple tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "writes": {
+                "tuple_keys": [
+                  {
+                    "user": "user:alice",
+                    "relation": "viewer",
+                    "object": "document:readme"
+                  },
+                  {
+                    "user": "user:bob",
+                    "relation": "editor",
+                    "object": "document:readme"
+                  },
+                  {
+                    "user": "user:carol",
+                    "relation": "admin",
+                    "object": "folder:projects"
+                  }
+                ]
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "write-delete-single",
+      "name": "Delete single tuple",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "deletes": {
+                "tuple_keys": [
+                  {
+                    "user": "user:alice",
+                    "relation": "viewer",
+                    "object": "document:readme"
+                  }
+                ]
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "write-mixed-operations",
+      "name": "Write and delete in same request",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "writes": {
+                "tuple_keys": [
+                  {
+                    "user": "user:alice",
+                    "relation": "viewer",
+                    "object": "document:readme"
+                  },
+                  {
+                    "user": "user:bob",
+                    "relation": "editor",
+                    "object": "document:readme"
+                  }
+                ]
+              },
+              "deletes": {
+                "tuple_keys": [
+                  {
+                    "user": "user:carol",
+                    "relation": "viewer",
+                    "object": "document:readme"
+                  }
+                ]
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "write-explicit-model",
+      "name": "Write with explicit authorization model",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.authorization_model_id",
+            "equalTo": "01H0H40Z9QDYNR71MRAG9FPE7N"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "write_success.json"
+      }
+    },
+    {
+      "id": "write-invalid-tuple",
+      "name": "Write fails with invalid tuple format",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes.tuple_keys[0].user",
+            "equalTo": "invalid-user"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "error_validation_invalid_tuple.json"
+      }
+    },
+    {
+      "id": "write-missing-model",
+      "name": "Write fails with missing authorization model",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes"
+          },
+          {
+            "doesNotMatchJsonPath": "$.authorization_model_id"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "error_validation_missing_model.json"
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "tuples": [
+    {
+      "key": {
+        "user": "user:alice",
+        "relation": "viewer",
+        "object": "document:readme"
+      },
+      "timestamp": "2024-01-15T14:30:25Z"
+    },
+    {
+      "key": {
+        "user": "user:bob",
+        "relation": "editor",
+        "object": "document:readme"
+      },
+      "timestamp": "2024-01-15T14:30:25Z"
+    },
+    {
+      "key": {
+        "user": "user:carol",
+        "relation": "admin",
+        "object": "folder:projects"
+      },
+      "timestamp": "2024-01-15T14:30:25Z"
+    }
+  ],
+  "continuation_token": ""
+}

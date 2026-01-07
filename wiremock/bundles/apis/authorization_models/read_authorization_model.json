@@ -1,0 +1,40 @@
+{
+  "mappings": [
+    {
+      "id": "read-authorization-model-success",
+      "name": "ReadAuthorizationModel - successful read",
+      "request": {
+        "method": "GET",
+        "urlPathPattern": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/authorization-models/.*"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "authorization_model": {
+            "id": "01G50QVV17PECNVAHX1GG4Y5NC",
+            "schema_version": "1.1",
+            "type_definitions": [
+              {
+                "type": "user"
+              },
+              {
+                "type": "document",
+                "relations": {
+                  "viewer": {
+                    "this": {}
+                  },
+                  "editor": {
+                    "this": {}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

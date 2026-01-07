@@ -1,0 +1,122 @@
+{
+  "mappings": [
+    {
+      "id": "check-with-contextual-tuples-allowed",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key[?(@.user == 'user:alice' && @.relation == 'viewer' && @.object == 'document:doc1')]"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples[?(@.user == 'user:bob' && @.relation == 'editor' && @.object == 'document:doc1')]"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples[?(@.user == 'user:charlie' && @.relation == 'owner' && @.object == 'document:doc1')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "check-with-contextual-tuples-admin-allowed",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key[?(@.user == 'user:alice' && @.relation == 'admin' && @.object == 'document:doc1')]"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples[?(@.user == 'user:alice' && @.relation == 'admin' && @.object == 'document:doc1')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "check-without-contextual-tuples-denied",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key[?(@.user == 'user:alice' && @.relation == 'admin' && @.object == 'document:doc1')]"
+          },
+          {
+            "absent": true,
+            "matchesJsonPath": "$.contextual_tuples"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": false
+        }
+      }
+    },
+    {
+      "id": "check-with-consistency-minimize-latency",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.consistency[?(@ == 'MINIMIZE_LATENCY')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "check-with-consistency-higher-consistency",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.consistency[?(@ == 'HIGHER_CONSISTENCY')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "tuples": [
+    {
+      "key": {
+        "user": "user:alice",
+        "relation": "viewer",
+        "object": "document:readme"
+      },
+      "timestamp": "2024-01-15T14:30:25Z"
+    },
+    {
+      "key": {
+        "user": "user:dave",
+        "relation": "viewer",
+        "object": "document:guide"
+      },
+      "timestamp": "2024-01-15T14:30:25Z"
+    }
+  ],
+  "continuation_token": ""
+}

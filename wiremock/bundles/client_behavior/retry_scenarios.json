@@ -1,0 +1,353 @@
+{
+  "mappings": [
+    {
+      "id": "transient-error-retry-1",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_with_retries"
+          },
+          "X-Retry-Count": {
+            "absent": true
+          }
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Retry-Count": "1"
+        },
+        "jsonBody": {
+          "code": "unavailable",
+          "message": "service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "id": "transient-error-retry-2",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "1"
+          }
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Retry-Count": "2"
+        },
+        "jsonBody": {
+          "code": "unavailable",
+          "message": "service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "id": "transient-error-retry-3",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "2"
+          }
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Retry-Count": "3"
+        },
+        "jsonBody": {
+          "code": "unavailable",
+          "message": "service temporarily unavailable"
+        }
+      }
+    },
+    {
+      "id": "transient-error-retry-success",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "3"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Final-Retry-Count": "3"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "rate-limit-retry-1",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "rate_limit_with_retries"
+          },
+          "X-Retry-Count": {
+            "absent": true
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "1",
+          "X-Retry-Count": "1"
+        },
+        "jsonBody": {
+          "code": "resource_exhausted",
+          "message": "rate limit exceeded"
+        }
+      }
+    },
+    {
+      "id": "rate-limit-retry-2",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "rate_limit_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "1"
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "2",
+          "X-Retry-Count": "2"
+        },
+        "jsonBody": {
+          "code": "resource_exhausted",
+          "message": "rate limit exceeded"
+        }
+      }
+    },
+    {
+      "id": "rate-limit-retry-3",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "rate_limit_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "2"
+          }
+        }
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "4",
+          "X-Retry-Count": "3"
+        },
+        "jsonBody": {
+          "code": "resource_exhausted",
+          "message": "rate limit exceeded"
+        }
+      }
+    },
+    {
+      "id": "rate-limit-retry-success",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "rate_limit_with_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "3"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Final-Retry-Count": "3"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "custom-retries-5-attempts",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_custom_retries"
+          },
+          "X-Retry-Count": {
+            "matches": "[0-4]"
+          }
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "unavailable",
+          "message": "service temporarily unavailable"
+        },
+        "transformers": ["response-template"],
+        "transformerParameters": {
+          "X-Retry-Count": "{{increment (request.headers.X-Retry-Count) 1}}"
+        }
+      }
+    },
+    {
+      "id": "custom-retries-success",
+      "priority": 1,
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "transient_error_custom_retries"
+          },
+          "X-Retry-Count": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Final-Retry-Count": "5"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "validation-error-no-retry",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "validation_error_no_retry"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key[?(!@.user || @.user == '')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Retry-Count": "0"
+        },
+        "jsonBody": {
+          "code": "invalid_argument",
+          "message": "user is required"
+        }
+      }
+    },
+    {
+      "id": "auth-error-no-retry",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Authorization": {
+            "equalTo": "Bearer invalid_token"
+          },
+          "X-Test-Scenario": {
+            "equalTo": "auth_error_no_retry"
+          }
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Retry-Count": "0"
+        },
+        "jsonBody": {
+          "code": "unauthenticated",
+          "message": "Invalid authentication credentials"
+        }
+      }
+    },
+    {
+      "id": "persistent-server-error",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "persistent_server_error"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "internal",
+          "message": "persistent server error"
+        }
+      }
+    }
+  ]
+}

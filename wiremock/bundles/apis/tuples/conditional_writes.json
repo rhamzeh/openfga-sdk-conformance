@@ -1,0 +1,190 @@
+{
+  "mappings": [
+    {
+      "id": "conditional-write-simple",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].condition",
+            "equalTo": "ip_check"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "condition": "ip_check",
+              "status": "success"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "conditional-write-complex",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].condition",
+            "contains": "&&"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc2"
+              },
+              "condition": "time_range && department_match",
+              "status": "success"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "conditional-write-nested-logic",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].condition",
+            "contains": "clearance_level >= 3"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "admin",
+                "object": "folder:secure"
+              },
+              "condition": "(clearance_level >= 3) && (location == 'office')",
+              "status": "success"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "conditional-write-invalid-condition",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].condition",
+            "equalTo": "invalid_condition"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid condition syntax"
+        }
+      }
+    },
+    {
+      "id": "conditional-write-with-context",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.writes[0].condition",
+            "contains": "user.department"
+          },
+          {
+            "matchesJsonPath": "$.context.user.department"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "writes": [
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "condition": "user.department == 'finance' && resource.classification == 'confidential'",
+              "status": "success"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "conditional-delete",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.deletes[0].condition",
+            "equalTo": "cleanup_time"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "deletes": [
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc1"
+              },
+              "condition": "cleanup_time",
+              "status": "success"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "mappings": [
+    {
+      "id": "network-timeout",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "timeout"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 30000
+      }
+    },
+    {
+      "id": "connection-refused",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "connection-refused"
+          }
+        }
+      },
+      "response": {
+        "fault": "CONNECTION_RESET_BY_PEER"
+      }
+    },
+    {
+      "id": "invalid-json-request",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "contains": "invalid_field"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid JSON format"
+        }
+      }
+    },
+    {
+      "id": "missing-required-fields",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.user",
+            "absent": true
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "user is required"
+        }
+      }
+    },
+    {
+      "id": "invalid-continuation-token",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/read",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.continuation_token",
+            "equalTo": "invalid_token_123"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid continuation token"
+        }
+      }
+    },
+    {
+      "id": "expired-continuation-token",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/read",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.continuation_token",
+            "equalTo": "expired_token_456"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "expired continuation token"
+        }
+      }
+    },
+    {
+      "id": "malformed-authorization-model-id",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.authorization_model_id",
+            "equalTo": "invalid-model-id-format"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid authorization model ID format"
+        }
+      }
+    },
+    {
+      "id": "corrupted-response",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "corrupted-response"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"allowed\": tru"
+      }
+    },
+    {
+      "id": "rate-limit-exceeded",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check"
+      },
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "60"
+        },
+        "jsonBody": {
+          "code": "rate_limit_exceeded",
+          "message": "Too many requests"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,719 @@
+[
+  {
+    "id": "integration-workflow-write",
+    "name": "Integration Test - Complete Authorization Workflow Write",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Workflow-ID": {
+          "equalTo": "auth-workflow-001"
+        },
+        "X-Client-Version": {
+          "equalTo": "integration-test-1.0"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-ID": "write-response-001",
+        "X-Processing-Time": "25ms"
+      },
+      "jsonBody": {
+        "writes": [
+          {
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "viewer",
+              "object": "document:readme"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "integration-workflow-check-with-auth",
+    "name": "Integration Test - Check with Authorization and Custom Headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "matches": "Bearer workflow-token-.*"
+        },
+        "X-Permission-Check": {
+          "equalTo": "viewer-access"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Auth-Validated": "true",
+        "X-Token-Type": "workflow"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "integration-streaming-list-objects",
+    "name": "Integration Test - Streaming List Objects with Headers",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-List-Operation": {
+          "equalTo": "streaming-objects"
+        },
+        "Accept-Encoding": {
+          "matches": ".*gzip.*"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "X-Stream-ID": "stream-001",
+        "Content-Encoding": "gzip"
+      },
+      "body": "{\"object\":\"document:readme\"}\n{\"object\":\"document:guide\"}\n{\"object\":\"document:tutorial\"}"
+    }
+  },
+  {
+    "id": "integration-read-changes-paginated",
+    "name": "Integration Test - Read Changes with Pagination Headers",
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/changes.*",
+      "headers": {
+        "X-Changes-Request": {
+          "equalTo": "paginated-read"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Page-Info": "page-1-of-5",
+        "X-Total-Changes": "47"
+      },
+      "jsonBody": {
+        "changes": [
+          {
+            "type": "document",
+            "operation": "TUPLE_OPERATION_WRITE",
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "viewer",
+              "object": "document:readme"
+            },
+            "timestamp": "2024-01-09T14:30:00Z"
+          }
+        ],
+        "continuation_token": "eyJwYWdlIjoyLCJsaW1pdCI6NX0="
+      }
+    }
+  },
+  {
+    "id": "integration-contextual-check",
+    "name": "Integration Test - Contextual Authorization Check",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "matches": "Bearer contextual-token-.*"
+        },
+        "X-Context-ID": {
+          "equalTo": "contextual-auth-002"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.contextual_tuples[0].user",
+          "equalToJson": "\"user:temp-user\""
+        },
+        {
+          "matchesJsonPath": "$.context.session_id",
+          "equalToJson": "\"temp-session-123\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Context-Validated": "true",
+        "X-Session-ID": "temp-session-123"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {
+          "context_used": true
+        }
+      }
+    }
+  },
+  {
+    "id": "integration-contextual-streaming",
+    "name": "Integration Test - Contextual Streaming List Objects",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Contextual-List": {
+          "equalTo": "with-session-data"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.user",
+          "equalToJson": "\"user:alice\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "X-Context-Applied": "true",
+        "X-Session-Context": "temp-session-123"
+      },
+      "body": "{\"object\":\"document:readme\"}\n{\"object\":\"document:contextual\"}"
+    }
+  },
+  {
+    "id": "integration-error-missing-auth",
+    "name": "Integration Test - Missing Authorization Error",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Error-Test": {
+          "equalTo": "missing-auth"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "absent": {
+            "key": "Authorization"
+          }
+        }
+      ]
+    },
+    "response": {
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json",
+        "WWW-Authenticate": "Bearer realm=\"OpenFGA\"",
+        "X-Error-Code": "UNAUTHENTICATED"
+      },
+      "jsonBody": {
+        "code": "unauthenticated",
+        "message": "Request is missing required authentication"
+      }
+    }
+  },
+  {
+    "id": "integration-rate-limit-error",
+    "name": "Integration Test - Rate Limiting Error",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Rate-Limit-Test": {
+          "equalTo": "trigger-429"
+        },
+        "X-Retry-Policy": {
+          "equalTo": "exponential-backoff"
+        }
+      }
+    },
+    "response": {
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "Retry-After": "60",
+        "X-RateLimit-Limit": "100",
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "1704808260"
+      },
+      "jsonBody": {
+        "code": "rate_limited",
+        "message": "Too many requests. Please retry after 60 seconds."
+      }
+    }
+  },
+  {
+    "id": "integration-multi-request-write",
+    "name": "Integration Test - Multi-Request Workflow Write",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Multi-Request-ID": {
+          "equalTo": "workflow-003"
+        },
+        "X-Request-Sequence": {
+          "equalTo": "1"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-Sequence": "1",
+        "X-Workflow-ID": "workflow-003"
+      },
+      "jsonBody": {
+        "writes": [
+          {
+            "tuple_key": {
+              "user": "user:david",
+              "relation": "admin",
+              "object": "project:alpha"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "integration-multi-request-check",
+    "name": "Integration Test - Multi-Request Workflow Check",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "equalTo": "Bearer multi-request-token"
+        },
+        "X-Multi-Request-ID": {
+          "equalTo": "workflow-003"
+        },
+        "X-Request-Sequence": {
+          "equalTo": "2"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Response-Sequence": "2",
+        "X-Workflow-ID": "workflow-003",
+        "X-Auth-Validated": "true"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "integration-multi-request-streaming",
+    "name": "Integration Test - Multi-Request Workflow Streaming",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Multi-Request-ID": {
+          "equalTo": "workflow-003"
+        },
+        "X-Request-Sequence": {
+          "equalTo": "3"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "X-Response-Sequence": "3",
+        "X-Workflow-ID": "workflow-003"
+      },
+      "body": "{\"object\":\"project:alpha\"}\n{\"object\":\"project:beta\"}"
+    }
+  },
+  {
+    "id": "integration-cors-preflight",
+    "name": "Integration Test - CORS Preflight Request",
+    "request": {
+      "method": "OPTIONS",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Origin": {
+          "equalTo": "https://example.com"
+        },
+        "Access-Control-Request-Method": {
+          "equalTo": "POST"
+        },
+        "Access-Control-Request-Headers": {
+          "matches": ".*authorization.*"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Access-Control-Allow-Origin": "https://example.com",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Custom-Header",
+        "Access-Control-Max-Age": "86400",
+        "Access-Control-Allow-Credentials": "true"
+      }
+    }
+  },
+  {
+    "id": "integration-cors-actual-request",
+    "name": "Integration Test - CORS Actual Request After Preflight",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Origin": {
+          "equalTo": "https://example.com"
+        },
+        "Authorization": {
+          "matches": "Bearer cors-token-.*"
+        },
+        "X-Custom-Origin": {
+          "equalTo": "web-client"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "https://example.com",
+        "Access-Control-Allow-Credentials": "true",
+        "X-CORS-Validated": "true"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {}
+      }
+    }
+  },
+  {
+    "id": "integration-bulk-write-large-dataset",
+    "name": "Integration Test - Bulk Write for Large Dataset",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Bulk-Operation": {
+          "equalTo": "large-dataset"
+        },
+        "X-Expected-Count": {
+          "equalTo": "100"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Bulk-Processed": "5",
+        "X-Processing-Time": "150ms"
+      },
+      "jsonBody": {
+        "writes": [
+          {
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "viewer",
+              "object": "document:file001"
+            }
+          },
+          {
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "viewer",
+              "object": "document:file002"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "integration-streaming-performance",
+    "name": "Integration Test - Streaming Performance Large Dataset",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Stream-Performance": {
+          "equalTo": "measure-throughput"
+        },
+        "Accept-Encoding": {
+          "equalTo": "gzip"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "Content-Encoding": "gzip",
+        "Content-Length": "2048",
+        "X-Stream-Objects": "50",
+        "X-Throughput": "1000-objects-per-second"
+      },
+      "body": "{\"object\":\"document:file001\"}\n{\"object\":\"document:file002\"}\n{\"object\":\"document:file003\"}\n{\"object\":\"document:file004\"}\n{\"object\":\"document:file005\"}"
+    }
+  },
+  {
+    "id": "integration-read-authorization-model",
+    "name": "Integration Test - Read Authorization Model",
+    "request": {
+      "method": "GET",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/authorization-models/01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "headers": {
+        "Authorization": {
+          "matches": "Bearer model-token-.*"
+        },
+        "X-Model-Operation": {
+          "equalTo": "read-current"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Model-Version": "1.1",
+        "X-Model-ID": "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+      },
+      "jsonBody": {
+        "authorization_model": {
+          "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+          "schema_version": "1.1",
+          "type_definitions": [
+            {
+              "type": "user"
+            },
+            {
+              "type": "document",
+              "relations": {
+                "viewer": {
+                  "this": {}
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "integration-list-authorization-models",
+    "name": "Integration Test - List Authorization Models with Pagination",
+    "request": {
+      "method": "GET",
+      "urlPathPattern": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/authorization-models.*",
+      "headers": {
+        "X-Model-List": {
+          "equalTo": "paginated"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Page-Size": "10",
+        "X-Total-Models": "25"
+      },
+      "jsonBody": {
+        "authorization_models": [
+          {
+            "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+            "schema_version": "1.1"
+          },
+          {
+            "id": "01ARZ3NDEKTSV4RRFFQ69G5FAW",
+            "schema_version": "1.1"
+          }
+        ],
+        "continuation_token": "eyJwYWdlIjoyLCJsaW1pdCI6MTB9"
+      }
+    }
+  },
+  {
+    "id": "integration-complex-hierarchy-write",
+    "name": "Integration Test - Complex Permission Hierarchy Write",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/write",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Complex-Setup": {
+          "equalTo": "hierarchy-001"
+        }
+      }
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Hierarchy-Created": "true",
+        "X-Relations-Count": "3"
+      },
+      "jsonBody": {
+        "writes": [
+          {
+            "tuple_key": {
+              "user": "user:alice",
+              "relation": "member",
+              "object": "team:engineering"
+            }
+          },
+          {
+            "tuple_key": {
+              "user": "team:engineering",
+              "relation": "viewer",
+              "object": "project:backend"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "integration-complex-hierarchy-check",
+    "name": "Integration Test - Complex Permission Hierarchy Check",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "Authorization": {
+          "matches": "Bearer hierarchy-token.*"
+        },
+        "X-Permission-Type": {
+          "equalTo": "indirect"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.tuple_key.user",
+          "equalToJson": "\"user:alice\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.relation",
+          "equalToJson": "\"viewer\""
+        },
+        {
+          "matchesJsonPath": "$.tuple_key.object",
+          "equalToJson": "\"project:backend\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "X-Permission-Resolved": "indirect",
+        "X-Resolution-Path": "user->team->project"
+      },
+      "jsonBody": {
+        "allowed": true,
+        "resolution": {
+          "indirect": true,
+          "path": ["user:alice", "team:engineering", "project:backend"]
+        }
+      }
+    }
+  },
+  {
+    "id": "integration-complex-hierarchy-streaming",
+    "name": "Integration Test - Complex Hierarchy Streaming List",
+    "request": {
+      "method": "POST",
+      "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/list-objects",
+      "headers": {
+        "Content-Type": {
+          "equalTo": "application/json"
+        },
+        "X-Complex-List": {
+          "equalTo": "all-permissions"
+        }
+      },
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": "$.type",
+          "equalToJson": "\"project\""
+        },
+        {
+          "matchesJsonPath": "$.user",
+          "equalToJson": "\"user:alice\""
+        }
+      ]
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/x-ndjson",
+        "X-Complex-Resolution": "true",
+        "X-Indirect-Objects": "2"
+      },
+      "body": "{\"object\":\"project:backend\"}\n{\"object\":\"project:frontend\"}"
+    }
+  }
+]

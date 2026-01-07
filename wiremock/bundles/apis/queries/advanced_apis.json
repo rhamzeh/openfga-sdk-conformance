@@ -1,0 +1,483 @@
+{
+  "mappings": [
+    {
+      "id": "read-changes-no-params",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:30:00Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:readme"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:31:00Z"
+            }
+          ],
+          "continuation_token": "eyJwayI6IkxBVEVTVF9OU0NPTkZJR19hdXRoMHN0b3JlIiwic2siOiIxem1qbXF3MWZLZExTcUoyN01MdTdqTjh0cWgifQ=="
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-type-filter",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "type": {
+            "equalTo": "tuple"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:30:00Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-pagination",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "page_size": {
+            "equalTo": "5"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:doc1"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:30:00Z"
+            },
+            {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "editor",
+                "object": "document:doc2"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:31:00Z"
+            }
+          ],
+          "continuation_token": "eyJwayI6IkxBVEVTVF9OU0NPTkZJR19hdXRoMHN0b3JlIiwic2siOiIxem1qbXF3MWZLZExTcUoyN01MdTdqTjh0cWgifQ=="
+        }
+      }
+    },
+    {
+      "id": "read-changes-with-continuation-token",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "continuation_token": {
+            "matches": ".*"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "tuple_key": {
+                "user": "user:charlie",
+                "relation": "admin",
+                "object": "document:doc3"
+              },
+              "operation": "TUPLE_OPERATION_WRITE",
+              "timestamp": "2024-01-15T10:32:00Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-changes-authorization-model-type",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "type": {
+            "equalTo": "authorization_model"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": [
+            {
+              "authorization_model": {
+                "id": "01H0H40Z9QDYNR71MRAG9FPE7N",
+                "schema_version": "1.1"
+              },
+              "operation": "AUTHORIZATION_MODEL_OPERATION_WRITE",
+              "timestamp": "2024-01-15T09:00:00Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "list-objects-basic",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:alice')]"
+          },
+          {
+            "matchesJsonPath": "$.relation[?(@=='viewer')]"
+          },
+          {
+            "matchesJsonPath": "$.type[?(@=='document')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "objects": [
+            "document:readme",
+            "document:guide",
+            "document:tutorial"
+          ]
+        }
+      }
+    },
+    {
+      "id": "list-objects-with-contextual-tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:bob')]"
+          },
+          {
+            "matchesJsonPath": "$.relation[?(@=='viewer')]"
+          },
+          {
+            "matchesJsonPath": "$.type[?(@=='document')]"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples[0].user[?(@=='user:bob')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "objects": [
+            "document:doc1",
+            "document:shared_doc"
+          ]
+        }
+      }
+    },
+    {
+      "id": "list-objects-with-context-object",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:alice')]"
+          },
+          {
+            "matchesJsonPath": "$.context.department[?(@=='marketing')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "objects": [
+            "document:marketing_plan",
+            "document:campaign_brief"
+          ]
+        }
+      }
+    },
+    {
+      "id": "list-objects-with-consistency",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.consistency[?(@=='MINIMIZE_LATENCY')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Consistency-Used": "MINIMIZE_LATENCY"
+        },
+        "jsonBody": {
+          "objects": [
+            "document:fast_access_doc"
+          ]
+        }
+      }
+    },
+    {
+      "id": "streamed-list-objects-basic",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/streamed-list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:alice')]"
+          },
+          {
+            "matchesJsonPath": "$.relation[?(@=='viewer')]"
+          },
+          {
+            "matchesJsonPath": "$.type[?(@=='document')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson",
+          "Transfer-Encoding": "chunked"
+        },
+        "body": "{\"object\":\"document:readme\"}\n{\"object\":\"document:guide\"}\n{\"object\":\"document:tutorial\"}\n"
+      }
+    },
+    {
+      "id": "streamed-list-objects-with-contextual-tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/streamed-list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.contextual_tuples[0].user[?(@=='user:charlie')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson"
+        },
+        "body": "{\"object\":\"document:doc2\"}\n{\"object\":\"document:shared_doc\"}\n"
+      }
+    },
+    {
+      "id": "streamed-list-objects-with-context-object",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/streamed-list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.context.user.department[?(@=='engineering')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson"
+        },
+        "body": "{\"object\":\"document:tech_spec\"}\n{\"object\":\"document:architecture\"}\n"
+      }
+    },
+    {
+      "id": "read-changes-invalid-type",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "type": {
+            "equalTo": "invalid_type"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "invalid type: must be 'tuple' or 'authorization_model'"
+        }
+      }
+    },
+    {
+      "id": "list-objects-missing-relation",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:alice')]"
+          },
+          {
+            "absent": "$.relation"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "relation is required"
+        }
+      }
+    },
+    {
+      "id": "read-changes-page-size-too-large",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "queryParameters": {
+          "page_size": {
+            "equalTo": "1000"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "validation_error",
+          "message": "page size too large: maximum allowed is 100"
+        }
+      }
+    },
+    {
+      "id": "read-changes-empty-result",
+      "request": {
+        "method": "GET",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/changes",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "empty_changes"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "changes": []
+        }
+      }
+    },
+    {
+      "id": "list-objects-no-matches",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/list-objects",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.user[?(@=='user:nonexistent')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "objects": []
+        }
+      }
+    },
+    {
+      "id": "streamed-list-objects-connection-test",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/streamed-list-objects",
+        "headers": {
+          "X-Test-Scenario": {
+            "equalTo": "streaming_connection_test"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/x-ndjson",
+          "Connection": "close"
+        },
+        "body": "{\"object\":\"document:test1\"}\n{\"object\":\"document:test2\"}\n"
+      }
+    }
+  ]
+}

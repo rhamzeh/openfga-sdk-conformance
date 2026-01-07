@@ -1,0 +1,172 @@
+{
+  "mappings": [
+    {
+      "id": "expand-basic",
+      "name": "Expand - basic request",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/expand",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "tree": {
+            "root": {
+              "name": "document:doc1#viewer",
+              "leaf": {
+                "users": {
+                  "users": [
+                    "user:alice"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "expand-with-contextual-tuples",
+      "name": "Expand - with contextual tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/expand",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "tree": {
+            "root": {
+              "name": "document:doc1#viewer",
+              "leaf": {
+                "users": {
+                  "users": [
+                    "user:alice",
+                    "user:bob"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "expand-with-context-object",
+      "name": "Expand - with context object",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/expand",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          },
+          {
+            "matchesJsonPath": "$.context"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "tree": {
+            "root": {
+              "name": "document:doc1#viewer",
+              "leaf": {
+                "computed": {
+                  "userset": "group:engineers#member"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "expand-with-computed-usersets",
+      "name": "Expand - with computed usersets from contextual tuples",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/expand",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.contextual_tuples[?(@.user == 'user:alice' && @.relation == 'member' && @.object == 'group:engineers')]"
+          },
+          {
+            "matchesJsonPath": "$.contextual_tuples[?(@.user == 'group:engineers' && @.relation == 'viewer' && @.object == 'document:doc1')]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "tree": {
+            "root": {
+              "name": "document:doc1#viewer",
+              "union": {
+                "child": [
+                  {
+                    "leaf": {
+                      "users": {
+                        "users": [
+                          "user:alice"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "leaf": {
+                      "computed": {
+                        "userset": "group:engineers#member"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

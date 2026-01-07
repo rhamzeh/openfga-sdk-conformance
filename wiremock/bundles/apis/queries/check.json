@@ -1,0 +1,143 @@
+{
+  "mappings": [
+    {
+      "id": "check-success-allowed",
+      "name": "Basic successful check - allowed",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_allowed.json"
+      }
+    },
+    {
+      "id": "check-success-denied",
+      "name": "Basic successful check - denied",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "user": "user:bob",
+                "relation": "admin",
+                "object": "document:readme"
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_denied.json"
+      }
+    },
+    {
+      "id": "check-explicit-model",
+      "name": "Check with explicit authorization model",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "headers": {
+          "Content-Type": {
+            "equalTo": "application/json"
+          }
+        },
+        "bodyPatterns": [
+          {
+            "equalToJson": {
+              "tuple_key": {
+                "user": "user:alice",
+                "relation": "viewer",
+                "object": "document:readme"
+              },
+              "authorization_model_id": "01H0H40Z9QDYNR71MRAG9FPE7N"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "check_success_allowed.json"
+      }
+    },
+    {
+      "id": "check-invalid-store",
+      "name": "Check with invalid store ID",
+      "request": {
+        "method": "POST",
+        "urlPathPattern": "/stores/invalid-store-id/check"
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "error_validation_invalid_store.json"
+      }
+    },
+    {
+      "id": "check-missing-model",
+      "name": "Check with missing authorization model",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01H0H40Z9QDYNR71MRAG9FPE7M/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          },
+          {
+            "doesNotMatchJsonPath": "$.authorization_model_id"
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Request-ID": "{{randomValue type='UUID'}}"
+        },
+        "bodyFileName": "error_validation_missing_model.json"
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "name": "@openfga/sdk-conformance-js",
+  "version": "0.1.0",
+  "description": "TypeScript SDK runner for OpenFGA Conformance Test Suite",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prebuild": "rm -rf dist/",
+    "test": "npm run build && cucumber-js dist/features/step_definitions/*.js",
+    "test:pretty": "npm run build && cucumber-js --format=pretty dist/features/step_definitions/*.js",
+    "test:json": "npm run build && cucumber-js --format=json:test-results.json dist/features/step_definitions/*.js",
+    "test:core": "npm run build && cucumber-js --tags='@core' dist/features/step_definitions/*.js",
+    "test:headers": "npm run build && cucumber-js --tags='@headers' dist/features/step_definitions/*.js",
+    "test:smoke": "npm run build && cucumber-js --tags='@smoke' dist/features/step_definitions/*.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
+  "dependencies": {
+    "@openfga/sdk": "^0.9.1",
+    "@cucumber/cucumber": "^12.5.0",
+    "axios": "^1.13.2",
+    "chai": "^6.2.2",
+    "chai-as-promised": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.0.1",
+    "@types/chai-as-promised": "^8.0.1",
+    "@types/node": "^25.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.2"
+  },
+  "keywords": [
+    "openfga",
+    "conformance",
+    "testing",
+    "bdd",
+    "cucumber",
+    "javascript",
+    "sdk"
+  ],
+  "author": "OpenFGA Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openfga/sdk-conformance.git",
+    "directory": "runners/js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

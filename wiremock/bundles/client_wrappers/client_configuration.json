@@ -1,0 +1,300 @@
+{
+  "mappings": [
+    {
+      "id": "batch-check-batch-size-10-first-batch",
+      "name": "BatchCheck with maxBatchSize 10 - First batch of 10 checks",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[9]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[10]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_0"},
+            {"allowed": true, "correlation_id": "check_1"},
+            {"allowed": true, "correlation_id": "check_2"},
+            {"allowed": true, "correlation_id": "check_3"},
+            {"allowed": true, "correlation_id": "check_4"},
+            {"allowed": false, "correlation_id": "check_5"},
+            {"allowed": true, "correlation_id": "check_6"},
+            {"allowed": true, "correlation_id": "check_7"},
+            {"allowed": true, "correlation_id": "check_8"},
+            {"allowed": false, "correlation_id": "check_9"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-batch-size-10-second-batch",
+      "name": "BatchCheck with maxBatchSize 10 - Second batch of 5 checks",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[4]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[5]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_10"},
+            {"allowed": false, "correlation_id": "check_11"},
+            {"allowed": true, "correlation_id": "check_12"},
+            {"allowed": true, "correlation_id": "check_13"},
+            {"allowed": true, "correlation_id": "check_14"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-batch-size-5-single-batch",
+      "name": "BatchCheck with maxBatchSize 5 - Single batch of 5 checks",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[4]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[5]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_0"},
+            {"allowed": true, "correlation_id": "check_1"},
+            {"allowed": false, "correlation_id": "check_2"},
+            {"allowed": true, "correlation_id": "check_3"},
+            {"allowed": true, "correlation_id": "check_4"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-parallel-requests-20-checks",
+      "name": "BatchCheck for parallel request testing - 20 checks",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "id": "batch-check-sequential-processing",
+      "name": "BatchCheck for sequential processing - single parallel request",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 50
+      }
+    },
+    {
+      "id": "batch-check-large-batch-50-checks",
+      "name": "BatchCheck for large batch optimization - 50 checks per batch",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[49]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[50]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": "{{range 0 50}}{{#if @first}}[{{/if}}{\"allowed\": {{#eq @index 12}}false{{else}}{{#eq @index 25}}false{{else}}{{#eq @index 37}}false{{else}}true{{/eq}}{{/eq}}{{/eq}}, \"correlation_id\": \"check_{{@index}}\"}{{#unless @last}},{{/unless}}{{#if @last}}]{{/if}}{{/range}}"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "id": "batch-check-default-configuration",
+      "name": "BatchCheck with default configuration - 100 checks",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 25
+      }
+    },
+    {
+      "id": "batch-check-runtime-override-10-first",
+      "name": "BatchCheck with runtime override - First batch of 10",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[9]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[10]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_0"},
+            {"allowed": true, "correlation_id": "check_1"},
+            {"allowed": true, "correlation_id": "check_2"},
+            {"allowed": false, "correlation_id": "check_3"},
+            {"allowed": true, "correlation_id": "check_4"},
+            {"allowed": true, "correlation_id": "check_5"},
+            {"allowed": true, "correlation_id": "check_6"},
+            {"allowed": true, "correlation_id": "check_7"},
+            {"allowed": false, "correlation_id": "check_8"},
+            {"allowed": true, "correlation_id": "check_9"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-runtime-override-10-second",
+      "name": "BatchCheck with runtime override - Second batch of 10",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[9]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[10]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_10"},
+            {"allowed": true, "correlation_id": "check_11"},
+            {"allowed": false, "correlation_id": "check_12"},
+            {"allowed": true, "correlation_id": "check_13"},
+            {"allowed": true, "correlation_id": "check_14"},
+            {"allowed": true, "correlation_id": "check_15"},
+            {"allowed": true, "correlation_id": "check_16"},
+            {"allowed": true, "correlation_id": "check_17"},
+            {"allowed": true, "correlation_id": "check_18"},
+            {"allowed": false, "correlation_id": "check_19"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "batch-check-runtime-override-5-third",
+      "name": "BatchCheck with runtime override - Third batch of 5",
+      "request": {
+        "method": "POST",
+        "url": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/batch-check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.checks[4]"
+          },
+          {
+            "doesNotMatchJsonPath": "$.checks[5]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "results": [
+            {"allowed": true, "correlation_id": "check_20"},
+            {"allowed": true, "correlation_id": "check_21"},
+            {"allowed": true, "correlation_id": "check_22"},
+            {"allowed": true, "correlation_id": "check_23"},
+            {"allowed": false, "correlation_id": "check_24"}
+          ]
+        }
+      }
+    }
+  ]
+}

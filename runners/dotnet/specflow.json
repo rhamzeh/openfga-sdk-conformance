@@ -1,0 +1,27 @@
+{
+  "language": {
+    "feature": "en-us"
+  },
+  "bindingCulture": {
+    "name": "en-US"
+  },
+  "runtime": {
+    "dependencies": [
+      {
+        "type": "context",
+        "implementation": "OpenFga.Sdk.Conformance.Support.TestContext"
+      }
+    ]
+  },
+  "stepAssemblies": [
+    {
+      "assembly": "OpenFga.Sdk.Conformance"
+    }
+  ],
+  "trace": {
+    "traceSuccessfulSteps": true,
+    "traceTimings": true,
+    "minTracedDuration": "0:0:0.1",
+    "stepDefinitionSkeletonStyle": "RegexAttribute"
+  }
+}

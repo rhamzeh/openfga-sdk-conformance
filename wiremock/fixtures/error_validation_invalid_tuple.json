@@ -1,0 +1,4 @@
+{
+  "code": "validation_error",
+  "message": "invalid tuple format: user ID must follow the format 'type:id'"
+}

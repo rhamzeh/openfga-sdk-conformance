@@ -1,0 +1,144 @@
+{
+  "mappings": [
+    {
+      "id": "check-wildcard-user",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.user",
+            "equalTo": "user:*"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "check-nested-userset",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.user",
+            "contains": "#member"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    },
+    {
+      "id": "check-complex-userset-hierarchy",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.user",
+            "equalTo": "organization:acme#admin"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 100
+      }
+    },
+    {
+      "id": "check-deep-userset-expansion",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.user",
+            "equalTo": "group:level10#member"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        },
+        "fixedDelayMilliseconds": 2000
+      }
+    },
+    {
+      "id": "check-conditional-relations",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.tuple_key.relation",
+            "equalTo": "conditional_viewer"
+          },
+          {
+            "matchesJsonPath": "$.context"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": false
+        }
+      }
+    },
+    {
+      "id": "check-multiple-contextual-conditions",
+      "request": {
+        "method": "POST",
+        "urlPath": "/stores/01ARZ3NDEKTSV4RRFFQ69G5FAV/check",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.contextual_tuples[0].user",
+            "equalTo": "user:alice"
+          },
+          {
+            "matchesJsonPath": "$.context.time"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "allowed": true
+        }
+      }
+    }
+  ]
+}

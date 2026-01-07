@@ -1,0 +1,4 @@
+{
+  "code": "validation_error",
+  "message": "invalid store ID format: must be a valid ULID"
+}
