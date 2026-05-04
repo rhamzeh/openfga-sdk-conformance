@@ -6,7 +6,10 @@ A shared, versioned conformance test suite for OpenFGA SDKs using Behavior-Drive
 
 This repository provides a unified testing framework to ensure consistent behavior across all OpenFGA SDKs (Go, JavaScript, .NET, Python, Java). It eliminates test duplication, prevents behavioral drift, and enables deterministic testing of complex scenarios like retries, authentication flows, and streaming.
 
-> [!WARNING]
+> [!Note] PoC Status
+> This is a PoC repo to address https://github.com/openfga/rfcs/pull/34 - it is unusuable in its current form and it will ultimately live in https://github.com/openfga/sdk-conformance in its final iteration.
+
+> [!WARNING] AI Disclosure
 > The code in this repo has been written with extensive help from AI Agents
 
 ## Architecture
